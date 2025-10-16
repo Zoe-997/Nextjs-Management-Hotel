@@ -1,0 +1,291 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../app/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// =====================================================
+// ===============   HOTEL MANAGEMENT   =================
+// =====================================================
+model Hotel {
+  id          Int      @id @default(autoincrement())
+  name        String
+  address     String?
+  phone       String?
+  description String?
+
+  logo        String?  // URL ảnh logo
+  logoWidth   Int?     // chiều rộng logo (px)
+  logoHeight  Int?     // chiều cao logo (px)
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("hotel")
+}
+
+// =====================================================
+// ===============   SEO MANAGEMENT   =================
+// =====================================================
+model SeoMeta {
+  id          Int      @id @default(autoincrement())
+  pageType    String   // VD: "home", "blog", "product", "booking"
+  pageSlug    String?  // VD: "/blogs" hoặc "/products/leather-belt"
+  title       String?
+  description String?
+  keywords    String?
+  canonical   String?
+  ogTitle     String?
+  ogDescription String?
+  ogImage     String?
+  twitterCard String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("seo_metas")
+}
+
+// =====================================================
+// ===============   USER / CUSTOMER   =================
+// =====================================================
+model User {
+  id            String      @id @default(uuid())
+  email         String      @unique
+  password      String
+  name          String?
+  phone         String?
+  birthday      DateTime?
+  avatarUrl     String?      // Cloudinary/Supabase avatar
+  role          Role         @default(CUSTOMER)
+  bookings      Booking[]
+  payments      Payment[]
+  vouchers      VoucherUser[]
+  reviews       Review[]
+  blogs         Blog[]
+  blogComments  BlogComment[]
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+
+  @@map("users")
+}
+
+// =====================================================
+// ===============   ROOM MANAGEMENT   =================
+// =====================================================
+model Room {
+  id            String       @id @default(uuid())
+  name          String
+  description   String?
+  pricePerNight Float
+  maxGuests     Int
+  images        String[]     // Multiple images (Cloudinary URLs)
+  status        RoomStatus   @default(AVAILABLE)
+  bookings      Booking[]
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+
+  @@map("rooms")
+}
+
+// =====================================================
+// ===============   BOOKING + PAYMENT   ===============
+// =====================================================
+model Booking {
+  id            String       @id @default(uuid())
+  userId        String
+  roomId        String
+  checkIn       DateTime
+  checkOut      DateTime
+  totalPrice    Float
+  status        BookingStatus  @default(PENDING)
+  payment       Payment?
+  user          User           @relation(fields: [userId], references: [id])
+  room          Room           @relation(fields: [roomId], references: [id])
+  review        Review?
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+
+  @@map("bookings")
+}
+
+model Payment {
+  id            String        @id @default(uuid())
+  bookingId     String        @unique
+  userId        String?
+  amount        Float
+  method        String?
+  transactionId String?
+  status        PaymentStatus  @default(PENDING)
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  booking       Booking        @relation(fields: [bookingId], references: [id])
+  user          User?          @relation(fields: [userId], references: [id])
+
+  @@map("payments")
+}
+
+// =====================================================
+// ===============   VOUCHER / PROMOTION   ==============
+// =====================================================
+model Voucher {
+  id             String       @id @default(uuid())
+  code           String       @unique
+  description    String?
+  discountType   DiscountType
+  discountValue  Float
+  validFrom      DateTime
+  validTo        DateTime
+  maxUsage       Int?
+  usageCount     Int           @default(0)
+  applicableRooms String[]
+  applicableDates DateTime[]
+  isActive       Boolean       @default(true)
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  users          VoucherUser[]
+
+  @@map("vouchers")
+}
+
+model VoucherUser {
+  id          String    @id @default(uuid())
+  voucherId   String
+  userId      String
+  used        Boolean   @default(false)
+  assignedAt  DateTime  @default(now())
+  usedAt      DateTime?
+  voucher     Voucher   @relation(fields: [voucherId], references: [id])
+  user        User      @relation(fields: [userId], references: [id])
+
+  @@map("voucher_users")
+}
+
+// =====================================================
+// ===============   REVIEW MANAGEMENT   ================
+// =====================================================
+model Review {
+  id          String     @id @default(uuid())
+  bookingId   String     @unique
+  userId      String
+  rating      Int
+  comment     String?
+  autoBlogId  String?     @unique // Blog auto-created from review
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  booking     Booking     @relation(fields: [bookingId], references: [id])
+  user        User        @relation(fields: [userId], references: [id])
+  autoBlog    Blog?       @relation("AutoBlogFromReview", fields: [autoBlogId], references: [id])
+
+  @@map("reviews")
+}
+
+// =====================================================
+// ===============   BLOG / SEO CONTENT   ===============
+// =====================================================
+model Blog {
+  id           String          @id @default(uuid())
+  title        String
+  slug         String          @unique
+  excerpt      String?
+  content      String
+  coverImage   String?         // Cloudinary / Supabase URL
+  authorId     String
+  publishedAt  DateTime?
+  status       BlogStatus      @default(DRAFT)
+  seoTitle     String?
+  seoDesc      String?
+  metaKeywords String[]        // For SEO optimization
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
+
+  author       User            @relation(fields: [authorId], references: [id])
+  tags         BlogTagOnBlog[]
+  comments     BlogComment[]
+  reviewSource Review?         @relation("AutoBlogFromReview")
+
+  @@map("blogs")
+}
+
+model BlogComment {
+  id         String    @id @default(uuid())
+  content    String
+  userId     String
+  blogId     String
+  createdAt  DateTime  @default(now())
+  user       User      @relation(fields: [userId], references: [id])
+  blog       Blog      @relation(fields: [blogId], references: [id])
+
+  @@map("blog_comments")
+}
+
+// =====================================================
+// ===============   BLOG TAG MANAGEMENT   ==============
+// =====================================================
+model BlogTag {
+  id      String          @id @default(uuid())
+  name    String           @unique
+  slug    String           @unique
+  blogs   BlogTagOnBlog[]
+
+  @@map("blog_tags")
+}
+
+model BlogTagOnBlog {
+  blogId  String
+  tagId   String
+  blog    Blog    @relation(fields: [blogId], references: [id])
+  tag     BlogTag @relation(fields: [tagId], references: [id])
+  @@id([blogId, tagId])
+
+  @@map("blog_tags_on_blogs")
+}
+
+// =====================================================
+// ===================== ENUMS ==========================
+// =====================================================
+enum Role {
+  ADMIN
+  CUSTOMER
+}
+
+enum RoomStatus {
+  AVAILABLE
+  BOOKED
+  MAINTENANCE
+}
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  CHECKED_IN
+  CHECKED_OUT
+  CANCELLED
+}
+
+enum PaymentStatus {
+  PENDING
+  SUCCESS
+  FAILED
+  REFUNDED
+}
+
+enum DiscountType {
+  PERCENTAGE
+  FIXED
+}
+
+enum BlogStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
