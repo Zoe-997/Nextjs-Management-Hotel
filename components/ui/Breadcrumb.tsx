@@ -3,7 +3,7 @@
 import React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { BsChevronDoubleRight } from 'react-icons/bs';
+import { MdNavigateNext } from 'react-icons/md';
 
 interface BreadcrumbProps {
   items?: { label: string; href?: string }[];
@@ -32,35 +32,26 @@ const Breadcrumb: React.FC<BreadcrumbProps> = ({ items, className }) => {
     );
   }
 
-  // Nếu chỉ là "/admin"
-  if (pathname === "/admin") {
-    return (
-      <div className="text-sm">
-        Admin
-      </div>
-    );
-  }
-
   return (
     <nav
       aria-label="Breadcrumb"
       className={`flex items-center text-sm ${className || ""}`}
     >
-      <Link href="/" className="hover:text-gray-800 transition">
+      <Link href="/" className="hover:text-[var(--color-link-hover)] transition">
         Home
       </Link>
 
       {segments.map((seg, i) => (
         <React.Fragment key={i}>
-          <BsChevronDoubleRight size={14} className="mx-1 text-gray-400" />
+          <MdNavigateNext size={14} className="mx-1 text-[var(--color-link-hover)]" />
           {i === segments.length - 1 ? (
-            <span className="text-gray-800 font-medium capitalize">
+            <span className="text-[var(--color-link-hover)] font-medium capitalize">
               {seg.label}
             </span>
           ) : (
             <Link
               href={seg.href ?? "#"}
-              className="hover:text-gray-800 capitalize transition"
+              className="hover:text-[var(--color-link-hover)] capitalize transition"
             >
               {seg.label}
             </Link>

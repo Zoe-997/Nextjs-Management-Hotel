@@ -1,21 +1,9 @@
 import type { Metadata } from "next";
-import { Lora, Outfit } from "next/font/google";
+
 import "../globals.css";
 import SideBar from "@/components/dashboard/SideBar";
-import Breadcrumb from "@/components/ui/Breadcrumb";
-import PageTitle from "@/components/ui/PageTitle";
-import Personal from "@/components/dashboard/Personal";
 import Copyright from "@/components/ui/Copyright";
-
-const headingFont = Lora({
-  variable: "--font-heading",
-  subsets: ["latin"],
-});
-
-const bodyFont = Outfit({
-  variable: "--font-body",
-  subsets: ["latin"],
-});
+import DashboardHeader from "@/components/dashboard/DashBoardHeader";
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -28,17 +16,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   const store = { name: "Booking" };
+  const pageTitle = "Dashboard Title"
   return (
     <div className="grid grid-cols-[300px_1fr] gap-6" >
       <aside className="bg-[#111C44] shadow-lg h-screen sticky top-0"><SideBar /></aside>
       <main className="min-h-screen p-5 sm:p-10 flex flex-col gap-7">
-        <div>
-          <Breadcrumb />
-          <div className="flex items-center justify-between gap-4">
-            <PageTitle title="Main Dashboard" />
-            <Personal />
-          </div>
-        </div>
+        <DashboardHeader title={pageTitle} />
         {children}
         <Copyright store={store} />
       </main>

@@ -15,6 +15,10 @@
   --scrollbar-thin-thumb: rgba(100, 100, 100, 0.4);
   --scrollbar-thin-thumb-hover: rgba(100, 100, 100, 0.6);
   --border: rgba(225, 225, 225, 0.1);
+  --primary-button-text: #171717;
+  --primary-button: #ffffff;
+  --primary-button-text-hover: #171717;
+  --primary-button-hover: #ffffff;
 }
 
 @theme inline {
@@ -27,6 +31,10 @@
   --color-link: var(--link);
   --color-link-hover: var(--link-hover);
   --color-border: var(--border);
+  --color-primary-button-text: var(--primary-button-text);
+  --color-primary-button: var(--primary-button);
+  --color-primary-button-text-hover: var(--primary-button-text-hover);
+  --color-primary-button-hover: var(--primary-button-hover);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -37,13 +45,16 @@
     --sidebar: #111C44;
     --link: #ffffff;
     --link-hover: #9ca3af;
+    --primary-button-text: #ffffff;
+    --primary-button: #111C44;
+    --primary-button-text-hover: #9ca3af;
+    --primary-button-hover: #0b122c;
   }
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
 }
 
 .scrollbar-thin::-webkit-scrollbar {

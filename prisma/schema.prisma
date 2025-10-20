@@ -67,6 +67,8 @@ model User {
   birthday      DateTime?
   avatarUrl     String?      // Cloudinary/Supabase avatar
   role          Role         @default(CUSTOMER)
+  customerType  CustomerType?  @default(REGULAR)
+  handle        String      @unique
   bookings      Booking[]
   payments      Payment[]
   vouchers      VoucherUser[]
@@ -254,8 +256,18 @@ model BlogTagOnBlog {
 // ===================== ENUMS ==========================
 // =====================================================
 enum Role {
-  ADMIN
-  CUSTOMER
+  ADMIN        // Quản trị toàn hệ thống
+  OWNER  // Chủ khách sạn
+  RECEPTIONIST // Lễ tân
+  MARKETING    // Bộ phận marketing
+  HOUSEKEEPING  // Bộ phận phục vụ phòng
+  CUSTOMER     // Khách hàng
+}
+
+enum CustomerType {
+  REGULAR  // Khách hàng thường
+  VIP      // Khách hàng VIP
+  VVIP     // Khách hàng cao cấp (Platinum)
 }
 
 enum RoomStatus {

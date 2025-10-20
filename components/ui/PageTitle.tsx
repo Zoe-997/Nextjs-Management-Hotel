@@ -2,7 +2,7 @@
 import React from "react";
 import { usePathname } from "next/navigation";
 
-interface PageTitleProps {
+export interface PageTitleProps {
   title: string;
   description?: string;
 }

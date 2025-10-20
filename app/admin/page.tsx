@@ -7,9 +7,7 @@ import PropertyMetrics from "@/components/dashboard/PropertyMetrics";
 import type { AnalyticsCardsProp } from "@/components/dashboard/AnalyticsCards";
 import type { BusinessOverviewProps } from "@/components/dashboard/BusinessOverview";
 import type { PropertyMetricsProps } from "@/components/dashboard/PropertyMetrics";
-import PageTitle from "@/components/ui/PageTitle";
 import TrendsGrowth from "@/components/dashboard/TrendsGrowth";
-import Personal from "@/components/dashboard/Personal";
 import type { CustomerInsightsProps } from "@/components/dashboard/CustomerInsights";
 
 import { IoMdWallet } from 'react-icons/io';
