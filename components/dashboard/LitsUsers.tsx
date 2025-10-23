@@ -34,7 +34,12 @@ const ListUsers = ({ users }: ListUsersProps) => {
                 <div className='flex gap-4 justify-center'>
                   <Link href={`/admin/users/${user.handle}`} className='cursor-pointer hover:text-[var(--color-link-hover)]' title='view'><FaRegEye size={20} /></Link>
                   <button className='cursor-pointer hover:text-[var(--color-link-hover)]' title='edit' onClick={() => {}}><FaRegEdit size={20} /></button>
-                  <button className='cursor-pointer hover:text-[var(--color-link-hover)]' title='remove' onClick={() => {}}><RiDeleteBin5Line size={20} /></button>
+                  <button className={`cursor-pointer hover:text-[var(--color-link-hover)]`} 
+                    title='remove' 
+                    onClick={() => {}}
+                  >
+                    <RiDeleteBin5Line size={20} />
+                  </button>
                 </div>
               </td>
             </tr>

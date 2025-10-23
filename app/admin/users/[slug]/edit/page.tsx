@@ -5,6 +5,7 @@ import { userProps } from "@/components/dashboard/UserCard";
 
 import { RiArrowGoBackLine } from 'react-icons/ri';
 import { BiSolidSave } from 'react-icons/bi';
+import CustomerType from "@/components/dashboard/CustomerType";
 
 const UserEdit = () => {
   const user = {
@@ -23,12 +24,21 @@ const UserEdit = () => {
     <div className="py-20">
       <h2 className="text-3xl font-[family-name:--font-heading] text-center">Edit User: {user.name}</h2>
       <ul className="text-lg">
-        {Object.entries(user).map(([key, value]) => (
-          <li key={key} className="py-3 flex gap-5 border-b-[1px] border-dashed border-[var(--color-border)] last:border-0">
-            <span className="capitalize min-w-[100px]">{key}:</span>
-            <span>{String(value)}</span>
-          </li>
-        ))}
+        {Object.entries(user).map(([key, value]) => {
+
+          return (
+            <li key={key} className="py-3 flex gap-5 items-center border-b-[1px] border-dashed border-[var(--color-border)] last:border-0 first:border-0">
+              {key !== 'customerType' && <label className="capitalize min-w-[100px]">{key}:</label>}
+              {key === 'customerType' && <CustomerType type={String(value)} />}
+              {key === 'id' && <span>{String(value)}</span>}
+              {key !== 'id' && key !== 'customerType' &&
+                <span className="border border-[var(--color-border)] px-5 py-2 rounded-md min-w-100" contentEditable="true">
+                  {String(value)}
+                </span>
+              }
+            </li>
+          )
+        })}
       </ul>
 
       <div className="flex items-center gap-4 mt-10 text-lg">

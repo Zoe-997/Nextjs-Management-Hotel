@@ -78,6 +78,9 @@ model User {
   createdAt     DateTime     @default(now())
   updatedAt     DateTime     @updatedAt
 
+  sourceId   String?
+  source     Source?   @relation(fields: [sourceId], references: [id])
+
   @@map("users")
 }
 
@@ -117,7 +120,19 @@ model Booking {
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
 
+  sourceId   String?
+  source     Source?   @relation(fields: [sourceId], references: [id])
+
   @@map("bookings")
+}
+
+model Source {
+  id       String    @id @default(uuid())
+  name     String    @unique
+  users    User[]
+  bookings Booking[]
+
+  @@map("sources")
 }
 
 model Payment {
@@ -273,6 +288,8 @@ enum CustomerType {
 enum RoomStatus {
   AVAILABLE
   BOOKED
+  OCCUPIED
+  CLEANING
   MAINTENANCE
 }
 

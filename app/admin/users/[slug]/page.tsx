@@ -7,6 +7,7 @@ import { FaRegEye, FaRegEdit, FaUserCircle } from 'react-icons/fa';
 import { TbCancel } from 'react-icons/tb';
 import { RiArrowGoBackLine, RiDeleteBin5Line } from 'react-icons/ri';
 import { GiCutDiamond, GiLaurelCrown } from 'react-icons/gi';
+import CustomerType from "@/components/dashboard/CustomerType";
 
 interface UserDetailProps {
   user: userProps & {
@@ -45,29 +46,29 @@ const UserDetail = () => {
       totalPrice: '500',
       status: 'CONFIRMED',
       payment:'SUCCESS'
+    },
+    {
+      id: 13,
+      roomId: 5,
+      checkIn: '22/10/225',
+      checkOut: '25/10/2025',
+      totalPrice: '500',
+      status: 'CANCELLED',
+      payment:'REFUNDED'
     }
   ]
 
   return (
     <div className="py-20">
-      <h2 className="text-3xl font-[family-name:--font-heading] text-center">View detail</h2>      
+      <h2 className="text-3xl font-[family-name:--font-heading] text-center">View detail</h2>
       <ul className="text-lg">
         {Object.entries(user).map(([key, value]) => {
-          let customerTypeClass = 'border-[#A0A0A0]'
-          if (value === 'VIP') customerTypeClass = 'border-[#FFD700] text-[#FFD700]'
-          if (value === 'VVIP') customerTypeClass = 'border-[#8B00FF] text-[#8B00FF]'
-
           return (
             <Fragment key={key}>
               {key === 'customerType' ? (
-                value !== null && <div className={`border border-solid w-fit px-5 py-1 rounded-lg flex items-center gap-1 ${customerTypeClass}`}>
-                  {value === 'VIP' && <GiCutDiamond size={20} />}
-                  {value === 'VVIP' && <GiLaurelCrown size={20} />}
-                  {value === 'REGULAR' && <FaUserCircle size={20} />}
-                  <span>{String(value)}</span>
-                </div>
+                value !== null && <CustomerType type={String(value)} />
               ) : (
-                <li className="py-3 flex gap-5 border-b-[1px] border-dashed border-[var(--color-border)] last:border-0">
+                <li className="py-3 flex gap-5 items-center border-b-[1px] border-dashed border-[var(--color-border)] last:border-0">
                   <span className="capitalize min-w-[100px]">{key}:</span>
                   <span>{String(value)}</span>
                 </li>
@@ -117,12 +118,14 @@ const UserDetail = () => {
                 ))}
   
                 <td className="p-2 border border-[var(--color-border)]">
-                  <div className='flex gap-4 justify-center hover:text-[var(--color-link-hover)]'>
-                    <Link href={`/admin/bookings/${booking.id}`} title="view">
+                  <div className='flex gap-4 justify-center'>
+                    <Link href={`/admin/bookings/${booking.id}`} title="view" className="hover:text-[var(--color-link-hover)]">
                       <FaRegEye size={20} />
                     </Link>
                     <button className='cursor-pointer hover:text-[var(--color-link-hover)]' title='edit' onClick={() => {}}><FaRegEdit size={20} /></button>
-                    <button className='cursor-pointer hover:text-[var(--color-link-hover)]' title='cancel' onClick={() => {}}><TbCancel size={20} /></button>
+                    <button className={`cursor-pointer hover:text-[var(--color-link-hover)]${booking.status === 'CANCELLED' && ' pointer-events-none text-[#c70a0a]'}`} title='cancel' onClick={() => {}}>
+                      <TbCancel size={20} />
+                    </button>
                   </div>
                 </td>
               </tr>
