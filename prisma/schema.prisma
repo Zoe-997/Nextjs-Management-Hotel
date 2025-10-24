@@ -81,6 +81,8 @@ model User {
   sourceId   String?
   source     Source?   @relation(fields: [sourceId], references: [id])
 
+  paymentHistories  PaymentHistory[]
+
   @@map("users")
 }
 
@@ -106,14 +108,24 @@ model Room {
 // ===============   BOOKING + PAYMENT   ===============
 // =====================================================
 model Booking {
-  id            String       @id @default(uuid())
+  id            String        @id @default(uuid())
   userId        String
   roomId        String
   checkIn       DateTime
   checkOut      DateTime
-  totalPrice    Float
-  status        BookingStatus  @default(PENDING)
-  payment       Payment?
+
+  basePrice     Float          // Giá phòng gốc
+  extraCharges  Float          @default(0) // Phí phát sinh thêm
+  depositAmount Float          @default(0) // Số tiền đặt cọc (0 nếu chưa cọc)
+  discount      Float          @default(0)
+  totalPrice    Float          // Tổng giá cuối cùng
+  balanceDue    Float          @default(0) // 💡 Số tiền khách cần trả thêm hoặc được hoàn
+  
+  paymentType    PaymentType   @default(POSTPAID)
+  paymentStatus  PaymentStatus @default(PENDING) // Trạng thái của thanh toán
+  status        BookingStatus  @default(PENDING) // Trạng thái của Booking
+  payments      Payment[]
+
   user          User           @relation(fields: [userId], references: [id])
   room          Room           @relation(fields: [roomId], references: [id])
   review        Review?
@@ -136,19 +148,44 @@ model Source {
 }
 
 model Payment {
-  id            String        @id @default(uuid())
-  bookingId     String        @unique
-  userId        String?
-  amount        Float
-  method        String?
-  transactionId String?
-  status        PaymentStatus  @default(PENDING)
-  createdAt     DateTime       @default(now())
-  updatedAt     DateTime       @updatedAt
-  booking       Booking        @relation(fields: [bookingId], references: [id])
-  user          User?          @relation(fields: [userId], references: [id])
+  id             String          @id @default(uuid())
+  bookingId      String
+  userId         String?
+  type           PaymentType     @default(DEPOSIT)
+  amount         Float
+  method         String?         // Tiền mặt, chuyển khoản, thẻ, v.v.
+  transactionId  String?         // ID giao dịch từ cổng thanh toán
+  status         PaymentStatus   @default(PENDING)
+  note           String?
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+
+  booking        Booking         @relation(fields: [bookingId], references: [id])
+  user           User?           @relation(fields: [userId], references: [id])
+  histories      PaymentHistory[]
 
   @@map("payments")
+  @@index([bookingId])
+}
+
+model PaymentHistory {
+  id             String          @id @default(uuid())
+  paymentId      String
+  changedById    String?         // Ai thay đổi
+  oldStatus      PaymentStatus?
+  newStatus      PaymentStatus?
+  oldAmount      Float?
+  newAmount      Float?
+  oldMethod      String?
+  newMethod      String?
+  note           String?
+  createdAt      DateTime        @default(now())
+
+  payment        Payment         @relation(fields: [paymentId], references: [id])
+  changedBy      User?           @relation(fields: [changedById], references: [id])
+
+  @@map("payment_histories")
+  @@index([paymentId])
 }
 
 // =====================================================
@@ -286,26 +323,30 @@ enum CustomerType {
 }
 
 enum RoomStatus {
-  AVAILABLE
-  BOOKED
-  OCCUPIED
-  CLEANING
-  MAINTENANCE
+  AVAILABLE   // Phòng trống
+  BOOKED      // Phòng đã được đặt
+  OCCUPIED    // Phòng đang có khách ở
+  CLEANING    // Phòng đang được dọn dẹp
+  MAINTENANCE // Phòng đang bảo trì hoặc sửa chữa
 }
 
 enum BookingStatus {
-  PENDING
-  CONFIRMED
-  CHECKED_IN
-  CHECKED_OUT
-  CANCELLED
+  PENDING       // Đang chờ xác nhận hoặc thanh toán
+  CONFIRMED     // Đã xác nhận
+  CHECKED_IN    // Đã nhận phòng
+  CHECKED_OUT   // Đã trả phòng
+  CANCELLED     // Đã hủy
+  NO_SHOW       // Không đến
+  EXPIRED       // Hết hạn thanh toán
+  REFUNDED      // Đã hoàn tiền
 }
 
 enum PaymentStatus {
-  PENDING
-  SUCCESS
-  FAILED
-  REFUNDED
+  PENDING         // Chưa thanh toán
+  PARTIALLY_PAID  // Đã thanh toán một phần
+  PAID            // Đã thanh toán đầy đủ
+  REFUNDED        // Đã hoàn tiền
+  FAILED          // Thanh toán thất bại
 }
 
 enum DiscountType {
@@ -317,4 +358,10 @@ enum BlogStatus {
   DRAFT
   PUBLISHED
   ARCHIVED
+}
+
+enum PaymentType {
+  PREPAID      // Thanh toán toàn bộ trước khi nhận phòng
+  DEPOSIT      // Thanh toán một phần (đặt cọc trước, trả nốt khi checkout)
+  POSTPAID     // Thanh toán toàn bộ sau khi checkout
 }
